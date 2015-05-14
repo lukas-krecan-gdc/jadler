@@ -13,33 +13,33 @@ This program is made available under the terms of the MIT License.
     <description>Core of the Jadler library.</description>
     <url>http://jadler.net</url>
     <packaging>jar</packaging>
-    
+
     <developers>
         <developer>
             <name>Jan Dudek</name>
             <email>jan.dudek.jr@gmail.com</email>
         </developer>
     </developers>
-    
+
     <licenses>
         <license>
             <name>MIT license</name>
             <url>http://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
-    
+
     <scm>
         <connection>scm:git:git@github.com:jadler-mocking/jadler.git</connection>
         <developerConnection>scm:git:git@github.com:jadler-mocking/jadler.git</developerConnection>
         <url>https://github.com/jadler-mocking/jadler</url>
     </scm>
-    
+
     <parent>
         <groupId>net.jadler</groupId>
         <artifactId>jadler-pom</artifactId>
-        <version>1.1.2-SNAPSHOT</version>
+        <version>1.2.0-SNAPSHOT</version>
     </parent>
- 
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -67,11 +67,11 @@ This program is made available under the terms of the MIT License.
         </dependency>
 
         <!-- TEST dependencies -->
-        <dependency> 
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
         </dependency>
-        <dependency> 
+        <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
         </dependency>
@@ -84,5 +84,5 @@ This program is made available under the terms of the MIT License.
             <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
-    
+
 </project>

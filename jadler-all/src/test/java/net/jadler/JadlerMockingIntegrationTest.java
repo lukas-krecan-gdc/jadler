@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -45,31 +46,31 @@ import static org.hamcrest.Matchers.nullValue;
  * an http client.
  */
 public class JadlerMockingIntegrationTest {
-        
+
     private static final String STRING_WITH_DIACRITICS = "\u00e1\u0159\u017e";
-    private static final byte[] UTF_8_REPRESENTATION = 
+    private static final byte[] UTF_8_REPRESENTATION =
             {(byte)0xC3, (byte)0xA1, (byte)0xC5, (byte)0x99, (byte)0xC5, (byte)0xBE};
     private static final byte[] ISO_8859_2_REPRESENTATION = {(byte)0xE1, (byte)0xF8, (byte)0xBE};
-    
+
     private static final byte[] BINARY_BODY = {1, 2, 3};
-    
+
     private static final Charset UTF_8_CHARSET = Charset.forName("UTF-8");
     private static final Charset ISO_8859_2_CHARSET = Charset.forName("ISO-8859-2");
-    
+
     private HttpClient client;
-    
-    
+
+
     @Rule
     public JadlerRule jadlerRule = new JadlerRule();
-    
+
     @Before
     public void setUp() {
         onRequest().respond().withStatus(200);
-        
+
         this.client = new HttpClient();
     }
-    
-    
+
+
     /*
      * Tests the havingBody methods.
      */
@@ -77,35 +78,35 @@ public class JadlerMockingIntegrationTest {
     public void havingBody() throws Exception {
         final PostMethod method = new PostMethod("http://localhost:" + port());
         method.setRequestEntity(new StringRequestEntity("postbody", null, null));
-        
+
         this.client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingBodyEqualTo("postbody")
             .havingBody(notNullValue())
             .havingBody(not(isEmptyOrNullString()))
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * An empty string (not null) is matched for an empty http request.
      */
     @Test
-    public void havingEmptyBody() throws Exception {               
+    public void havingEmptyBody() throws Exception {
         final PostMethod method = new PostMethod("http://localhost:" + port());
         method.setRequestEntity(new StringRequestEntity("", null, null));
-        
+
         this.client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingBodyEqualTo("")
             .havingBody(notNullValue())
             .havingBody(isEmptyString())
         .receivedTimes(1);
     }
-    
-    
+
+
     /*
      * Tests the havingRawBody method
      */
@@ -113,48 +114,48 @@ public class JadlerMockingIntegrationTest {
     public void havingRawBody() throws IOException {
         final PostMethod method = new PostMethod("http://localhost:" + port());
         method.setRequestEntity(new ByteArrayRequestEntity(BINARY_BODY));
-        
+
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingRawBodyEqualTo(BINARY_BODY)
         .receivedTimes(equalTo(1));
     }
-    
-    
+
+
     /*
      * An empty array (not null) is matched for an empty http request.
      */
     @Test
-    public void havingRawEmptyBody() throws IOException {        
+    public void havingRawEmptyBody() throws IOException {
         final PostMethod method = new PostMethod("http://localhost:" + port());
-        
+
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingRawBodyEqualTo(new byte[0])
         .receivedTimes(both(lessThan(2)).and(not(lessThan(0))));
     }
-    
-    
+
+
     /*
      * Matches a request with a text body encoded using UTF-8.
      */
     @Test
-    public void havingUTF8Body() throws Exception {        
+    public void havingUTF8Body() throws Exception {
         final PostMethod method = new PostMethod("http://localhost:" + port());
         method.setRequestEntity(
                 new StringRequestEntity(STRING_WITH_DIACRITICS, "text/plain", UTF_8_CHARSET.name()));
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingBodyEqualTo(STRING_WITH_DIACRITICS)
             .havingRawBodyEqualTo(UTF_8_REPRESENTATION)
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Matches a request with a text body encoded using ISO-8859-2.
      */
@@ -165,14 +166,14 @@ public class JadlerMockingIntegrationTest {
                 new StringRequestEntity(STRING_WITH_DIACRITICS, "text/plain", ISO_8859_2_CHARSET.name()));
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingBodyEqualTo(STRING_WITH_DIACRITICS)
             .havingRawBodyEqualTo(ISO_8859_2_REPRESENTATION)
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests a combination of the havingHeader methods.
      */
@@ -182,9 +183,9 @@ public class JadlerMockingIntegrationTest {
         method.addRequestHeader("hdr1", "h1v1");
         method.addRequestHeader("hdr2", "h2v1");
         method.addRequestHeader("hdr2", "h2v2");
-        
+
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingHeader("hdr1")
             .havingHeader("hdr1", not(empty()))
@@ -202,26 +203,27 @@ public class JadlerMockingIntegrationTest {
             .havingHeaders("hDR1", "hdr2")
         .receivedOnce();
     }
-    
-    
+
+
     /*
-     * I'm not sure whether a request header can be empty according to the RFC. However, it seems to work. 
+     * I'm not sure whether a request header can be empty according to the RFC. However, it seems to work.
      */
     @Test
+    @Ignore
     public void havingEmptyHeader() throws IOException {
         final GetMethod method = new GetMethod("http://localhost:" + port());
         method.addRequestHeader("empty", "");
-        
+
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingHeaderEqualTo("empty", "")
             .havingHeader("empty")
             .havingHeader("empty", everyItem(isEmptyString()))
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests the havingMethod methods.
      */
@@ -230,7 +232,7 @@ public class JadlerMockingIntegrationTest {
         final PostMethod method = new PostMethod("http://localhost:" + port());
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingMethodEqualTo("POST")
                 //the comparison must be case insensitive
@@ -239,19 +241,19 @@ public class JadlerMockingIntegrationTest {
             .havingMethod(anything())
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests the havingParameter methods for a GET http request. Only query string values
      * are considered http parameters for a GET http request.
      */
     @Test
-    public void havingParameterGET() throws Exception {        
-        final GetMethod method = new GetMethod("http://localhost:" + port() + 
+    public void havingParameterGET() throws Exception {
+        final GetMethod method = new GetMethod("http://localhost:" + port() +
                 "?p1=p1v1&p2=p2v1&p2=p2v2&p3=&p4&url%20encoded=url%20encoded");
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingParameter("p1")
             .havingParameter("p1", hasSize(1))
@@ -274,13 +276,13 @@ public class JadlerMockingIntegrationTest {
             .havingParameter("url%20encoded", contains("url%20encoded"))
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests the havingParameter methods for a POST http request with the
      * application/x-www-form-urlencoded content type. Both query string and request body values
      * are considered http parameters for such an http request.
-     * 
+     *
      * This test also tests a combination of havingParameter and havingBody methods
      * since both of these require an access to the request body (which causes troubles
      * in the servlet specification).
@@ -288,12 +290,12 @@ public class JadlerMockingIntegrationTest {
     @Test
     public void havingParameterPOST() throws Exception {
         final String body = "p1=p1v1&p2=p2v1&p2=p2v2&p3=&p4&url%20encoded=url%20encoded";
-        
+
         final PostMethod method = new PostMethod("http://localhost:" + port() + "?p2=p2v3");
         method.setRequestEntity(new StringRequestEntity(body, "application/x-www-form-urlencoded", "UTF-8"));
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingParameter("p1")
             .havingParameter("p1", hasSize(1))
@@ -318,30 +320,30 @@ public class JadlerMockingIntegrationTest {
             .havingBodyEqualTo(body)
         .receivedOnce();
     }
-    
-    
+
+
     /*
-     * Tests the havingQueryString methods. 
+     * Tests the havingQueryString methods.
      */
     @Test
     public void havingQueryString() throws Exception {
         final GetMethod method = new GetMethod("http://localhost:" + port() + "?p1=v1&p2=v2&name=%C5%99eho%C5%99");
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingQueryStringEqualTo("p1=v1&p2=v2&name=%C5%99eho%C5%99")
             .havingQueryString(not(isEmptyOrNullString()))
             .havingQueryString(anything())
         .receivedOnce();
     }
-    
-    
+
+
     /*
-     * Tests the havingQueryString methods. 
+     * Tests the havingQueryString methods.
      */
     @Test
-    public void havingEmptyQueryString() throws Exception {        
+    public void havingEmptyQueryString() throws Exception {
           //it seems HttpClient cannot send a request with an empty query string ('?' as the last character)
           //let's test this in a more hardcore fashion
         final URL url = new URL("http://localhost:" + port() + "/?");
@@ -353,24 +355,24 @@ public class JadlerMockingIntegrationTest {
             .havingQueryString(isEmptyString())
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Null value is matched for a http request without a query string
      */
     @Test
-    public void havingNoQueryString() throws Exception {        
+    public void havingNoQueryString() throws Exception {
         final GetMethod method = new GetMethod("http://localhost:" + port());
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingQueryString(nullValue())
             .havingQueryString(not(equalTo("")))
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests the havingPath methods.
      */
@@ -379,14 +381,14 @@ public class JadlerMockingIntegrationTest {
         final GetMethod method = new GetMethod("http://localhost:" + port() + "/a/b/c/d/%C5%99");
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingPathEqualTo("/a/b/c/d/%C5%99")
             .havingPath(notNullValue())
         .receivedOnce();
     }
-    
-    
+
+
     /*
      * Tests the havingPath methods for a root path.
      */
@@ -396,26 +398,26 @@ public class JadlerMockingIntegrationTest {
         final GetMethod method = new GetMethod("http://localhost:" + port() + "/");
 
         client.executeMethod(method);
-        
+
         verifyThatRequest()
             .havingPath(equalTo("/"))
             .havingPath(not(isEmptyOrNullString()))
         .receivedOnce();
     }
-    
-    
+
+
     /*
-     * Tests verifying without any predicates (all requests matched in this case) 
+     * Tests verifying without any predicates (all requests matched in this case)
      */
     @Test
     public void noPredicates() throws IOException {
         final GetMethod method = new GetMethod("http://localhost:" + port() + "/");
         client.executeMethod(method);
-        
+
         verifyThatRequest().receivedOnce();
     }
-    
-    
+
+
     /*
      * No such a request received
      */
@@ -423,15 +425,15 @@ public class JadlerMockingIntegrationTest {
     public void noSuchRequest() throws IOException {
         verifyThatRequest()
         .receivedNever();
-        
+
         verifyThatRequest()
         .receivedTimes(0);
-        
+
         verifyThatRequest()
         .receivedTimes(equalTo(0));
     }
-    
-    
+
+
     /*
      * No such a request received
      */
